@@ -1,7 +1,7 @@
 import logging
 import json
 import mimes
-ADDRESS = "localhost"
+HOSTNAME = "192.168.178.50"
 PORT = 81
 PUBLIC_DIR = "public" # folder to load documents from
 ERROR_DOC = { #Location of error documents. Loaded from root folder

@@ -7,7 +7,7 @@ import os
 import sys
 sys.path.append("conf")
 import conf as c # conf.py
-ADDRESS = c.ADDRESS
+HOSTNAME = c.HOSTNAME
 PORT = c.PORT
 PUBLIC_DIR = c.PUBLIC_DIR
 ERROR_DOC = c.ERROR_DOC
@@ -69,7 +69,7 @@ class Server(BaseHTTPRequestHandler):
 
 def run(server_class= HTTPServer, handler_class=BaseHTTPRequestHandler):
     logging.basicConfig(level=logging.INFO)
-    server_address = (ADDRESS,PORT)
+    server_address = (HOSTNAME,PORT)
     httpd = server_class(server_address, handler_class)
     httpd.serve_forever()
 
