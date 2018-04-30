@@ -14,8 +14,8 @@ ERROR_DOC = c.ERROR_DOC
 MIME_TYPES = c.MIME_TYPES
 
 class Server(BaseHTTPRequestHandler):
-    server_version = "Melvin2204-webserver"
-    sys_version = "1.0"
+    server_version = c.SERVER_VERSION
+    sys_version = c.SYS_VERSION
     def _set_resonse(self,type = "text/plain",code=200):
         self.send_response(code)
         self.send_header("Content-type",type)
@@ -76,7 +76,7 @@ class Server(BaseHTTPRequestHandler):
 
 
 def run(server_class= HTTPServer, handler_class=BaseHTTPRequestHandler):
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=c.LOG_LEVEL)
     server_address = (HOSTNAME,PORT)
     logging.info("Starting server")
     httpd = server_class(server_address, handler_class)
