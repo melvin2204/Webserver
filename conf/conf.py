@@ -1,6 +1,9 @@
 import logging
 import json
-import mimes
+import conf.mimes as mimes
+import sys
+if __name__ == "__main__":
+    sys.exit()
 HOSTNAME = "localhost"
 PORT = 8080
 PUBLIC_DIR = "public" # folder to load documents from
@@ -9,5 +12,5 @@ ERROR_DOC = { #Location of error documents. Loaded from root folder
 }
 MIME_TYPES = mimes.MIME_TYPES #types of mimes the server accepts. To change add your items in mimes.py
 SERVER_VERSION = "Melvin2204-webserver"
-SYS_VERSION = "1.0"
-LOG_LEVEL = logging.WARNING
+SYS_VERSION = ""
+LOG_LEVEL = logging.INFO
