@@ -14,26 +14,27 @@ ERROR_DOC = c.ERROR_DOC
 MIME_TYPES = c.MIME_TYPES
 
 class Server(BaseHTTPRequestHandler):
+    server_version = "Melvin2204-webserver"
+    sys_version = "1.0"
     def _set_resonse(self,type = "text/plain",code=200):
         self.send_response(code)
         self.send_header("Content-type",type)
-        self.send_header("Server", "MelvinServer")
         self.end_headers()
 
     def do_GET(self):
         logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
         file = self.getFile(self.path)
         if not file == False:
-            self._set_resonse(type = file[1])
-            self.wfile.write(file[0].encode('utf-8'))
+            self._set_resonse(type=file[1],code=200)
+            self.wfile.write(file[0])
         else:
             error_doc = self.getFile(ERROR_DOC.get("404"),root=True)
             if error_doc == False:
                 self._set_resonse(type=file[1],code=404)
                 self.wfile.write("404 not found but another 404 occurred when loading the error document.".encode('utf-8'))
             else:
-                self._set_resonse(type=error_doc[1], code=404)
-                self.wfile.write(error_doc[0].encode('utf-8'))
+                self._set_resonse(type=error_doc[1],code=404)
+                self.wfile.write(error_doc[0])
 
     def do_POST(self):
         #content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
@@ -56,12 +57,13 @@ class Server(BaseHTTPRequestHandler):
         if not os.path.isfile(loc):
             return False
         try:
-            tempFile = open(loc,"r")
+            tempFile = open(loc,"rb")
             data = tempFile.read()
             tempFile.close()
             type = os.path.splitext(loc)[1][1:]
             return (data,self.checkType(type))
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     def checkType(self,extension):
