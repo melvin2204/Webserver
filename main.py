@@ -4,14 +4,14 @@ Python webserver by Melvin2204
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import logging
 import os
-PORT = 81
-PUBLIC_DIR = "public"
-ERROR_DOC = {"404":"404.html"}
-CONTENT_TYPES = {
-    "html": "text/html",
-    "css": "text/css",
-    "js": "application/javascript"
-}
+import sys
+sys.path.append("conf")
+import conf as c # conf.py
+HOSTNAME = c.HOSTNAME
+PORT = c.PORT
+PUBLIC_DIR = c.PUBLIC_DIR
+ERROR_DOC = c.ERROR_DOC
+MIME_TYPES = c.MIME_TYPES
 
 class Server(BaseHTTPRequestHandler):
     def _set_resonse(self,type = "text/html"):
@@ -22,12 +22,12 @@ class Server(BaseHTTPRequestHandler):
     def do_GET(self):
         logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
         file = self.getFile(self.path)
-        if not file[0] == False:
+        if not file == False:
             self._set_resonse(type = file[1])
             self.wfile.write(file[0].encode('utf-8'))
         else:
             error_doc = self.getFile(ERROR_DOC.get("404"),root=True)
-            if error_doc[0] == False:
+            if error_doc == False:
                 self.send_response(404)
                 self.send_header("Content-type", "text/plain")
                 self.end_headers()
@@ -59,7 +59,7 @@ class Server(BaseHTTPRequestHandler):
             return False
 
     def checkType(self,extension):
-        type = CONTENT_TYPES.get(extension)
+        type = MIME_TYPES.get(extension)
         if type == None:
             return "text/plain"
         else:
@@ -69,7 +69,7 @@ class Server(BaseHTTPRequestHandler):
 
 def run(server_class= HTTPServer, handler_class=BaseHTTPRequestHandler):
     logging.basicConfig(level=logging.INFO)
-    server_address = ('192.168.178.50',PORT)
+    server_address = (HOSTNAME,PORT)
     httpd = server_class(server_address, handler_class)
     httpd.serve_forever()
 
