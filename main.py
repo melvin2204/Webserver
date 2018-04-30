@@ -22,12 +22,12 @@ class Server(BaseHTTPRequestHandler):
     def do_GET(self):
         logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
         file = self.getFile(self.path)
-        if not file[0] == False:
+        if not file == False:
             self._set_resonse(type = file[1])
             self.wfile.write(file[0].encode('utf-8'))
         else:
             error_doc = self.getFile(ERROR_DOC.get("404"),root=True)
-            if error_doc[0] == False:
+            if error_doc == False:
                 self.send_response(404)
                 self.send_header("Content-type", "text/plain")
                 self.end_headers()
