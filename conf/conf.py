@@ -13,4 +13,5 @@ ERROR_DOC = { #Location of error documents. Loaded from root folder
 MIME_TYPES = mimes.MIME_TYPES #types of mimes the server accepts. To change add your items in mimes.py
 SERVER_VERSION = "Melvin2204-webserver"
 SYS_VERSION = ""
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.WARNING
+BEHIND_PROXY = True# if the server is behind a proxy.
