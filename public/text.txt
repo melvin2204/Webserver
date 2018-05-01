@@ -1,1 +1,1 @@
-hello
+content-type shoud be text/plain
