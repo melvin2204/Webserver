@@ -75,30 +75,29 @@ class Server(BaseHTTPRequestHandler):
             loc = file
         else:
             loc = self.makeLocation(file)
-        print(loc)
         if not os.path.isfile(loc):
             return False
         try:
-            tempFile = open(loc,"rb")
             if loc.endswith(".py"):
-                outputCode = "def printhook(text):\n\tself.wfile.write(text.encode('utf-8'))\nprint = printhook\n\n\n"
-                data = outputCode + tempFile.read().decode("utf-8")
-                firstLine = tempFile.readline().decode("utf-8")
+                tempFile = open(loc, "r")
+                outputCode = "def printhook(text):\n\tif isinstance(text,bytes):\n\t\tself.wfile.write(text)\n\telse:\n\t\tself.wfile.write(text.encode('utf-8'))\nprint = printhook\n\n\n"
+                data = outputCode + tempFile.read()
+                tempFile.seek(0)
+                firstLine = tempFile.readline().strip()
+                type = "text/plain"
                 if firstLine.startswith("#"):
                     header = firstLine.split(":")[0].replace(" ","")
                     if header.lower()[1:] == "content-type":
-                        type = firstLine.split(":")[1].replace(" ","")
-                    else:
-                        type = "text/plain"
-                else:
-                    type = "text/plain"
+                        type = firstLine.split(":")[1].replace(" ", "")
                 run = True
             else:
+                tempFile = open(loc,"rb")
                 data = tempFile.read()
                 type = os.path.splitext(loc)[1][1:]
                 run = False
+                type = self.checkType(type)
             tempFile.close()
-            return (data,self.checkType(type),run)
+            return (data,type,run)
         except Exception as e:
             print(e)
             return False
