@@ -11,7 +11,8 @@ from datetime import datetime
 output("Hello, world!<br>")
 output("This is inline python!<br>")
 output("With calculations! " + str(10**10) + "<br>")
-output("The time is now " + str(datetime.now().time()))
+output("The time is now " + str(datetime.now().time()) + "<br>")
+output("Your useragent: " + USER_AGENT)
 ?>
 </p>
 </body>
