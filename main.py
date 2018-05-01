@@ -80,7 +80,7 @@ class Server(BaseHTTPRequestHandler):
         try:
             if loc.endswith(".py"):
                 tempFile = open(loc, "r")
-                outputCode = "def printhook(text):\n\tif isinstance(text,bytes):\n\t\tself.wfile.write(text)\n\telse:\n\t\tself.wfile.write(text.encode('utf-8'))\nprint = printhook\n\n\n"
+                outputCode = "def printhook(text):\n\tif isinstance(text,bytes):\n\t\tself.wfile.write(text)\n\telse:\n\t\tself.wfile.write(str(text).encode('utf-8'))\nprint = printhook\n\n\n"
                 data = outputCode + tempFile.read()
                 tempFile.seek(0)
                 firstLine = tempFile.readline().strip()
