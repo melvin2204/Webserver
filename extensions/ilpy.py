@@ -59,5 +59,7 @@ def run(runFile):
     output = ""
     code = ""
     StartTag = False
-    os.remove(str(tempFileName) + ".ilpytemp")
-    return outputTemp
+    try:
+        os.remove(str(tempFileName) + ".ilpytemp")
+    finally:
+        return outputTemp
