@@ -5,13 +5,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import logging
 import os
 import sys
-import _thread as thread
-import conf.conf as c # conf.py
-"""try:
+import threading
+from socketserver import ThreadingMixIn
+try:
     import conf.conf as c # conf.py
 except:
     logging.critical("Could not find conf.py.")
-    sys.exit()"""
+    sys.exit()
 
 HOSTNAME = c.config['server']['HOSTNAME']
 PORT = int(c.config['server']['PORT'])
@@ -119,12 +119,15 @@ class Server(BaseHTTPRequestHandler):
         else:
             return type
 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle requests in a separate thread."""
 
 def run(server_class= HTTPServer, handler_class=BaseHTTPRequestHandler):
     logging.basicConfig(level=c.LOG_LEVEL)
     server_address = (HOSTNAME,PORT)
     logging.info("Starting server")
-    httpd = server_class(server_address, handler_class)
+    #httpd = server_class(server_address, handler_class)
+    httpd = ThreadedHTTPServer(server_address, handler_class)
     logging.info("Running forever")
     httpd.serve_forever()
 
