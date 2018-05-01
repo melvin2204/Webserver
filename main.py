@@ -51,7 +51,7 @@ class Server(BaseHTTPRequestHandler):
                 self._set_resonse(type=file[1], code=200)
                 #exec(file[0], arguments)
                 dir_path = os.path.dirname(os.path.realpath(__file__))
-                output = ilpy.run(dir_path + "/" + file[0])
+                output = ilpy.run(dir_path + "/" + file[0],arguments)
                 firstLine = output.split("\n",1)[0]
                 if firstLine.startswith("#"):
                     output = output.split("\n",1)[1]
@@ -87,10 +87,7 @@ class Server(BaseHTTPRequestHandler):
         try:
             if loc.endswith(".ilpy"):
                 tempFile = open(loc, "r")
-                #outputCode = "def printhook(text):\n\tif isinstance(text,bytes):\n\t\tself.wfile.write(text)\n\telse:\n\t\tself.wfile.write(str(text).encode('utf-8'))\nprint = printhook\n\n\n"
-                #data = outputCode + tempFile.read()
                 data = loc
-                #tempFile.seek(0)
                 firstLine = tempFile.readline().strip()
                 type = "text/plain"
                 if firstLine.startswith("#"):

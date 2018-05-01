@@ -6,18 +6,18 @@ code = ""
 output = ""
 tempFileName = None
 
-def work(line):
+def work(line,arguments):
     global StartTag,code
     if line[:4] == "<?py":
         StartTag = True
         return
     if line[:2] == "?>":
-        runCode()
+        runCode(arguments)
         StartTag = False
         return
     code = code + line
 
-def runCode():
+def runCode(arguments):
     global code,output, tempFileName
     tempFileName = int(round(time.time() * 1000))
     injectionCode = """\
@@ -35,7 +35,7 @@ print = output
     try:
         file = open(str(tempFileName) + ".ilpytemp","w+")
         file.close()
-        exec(code)
+        exec(code,arguments)
     except Exception as e:
         file = open(str(tempFileName) + ".ilpytemp","a")
         file.write(str(e) + "\n")
@@ -46,12 +46,12 @@ print = output
             output = output + line
         file.close()
 
-def run(runFile):
+def run(runFile,arguments):
     global StartTag,output,code,tempFileName
     file = open(runFile, "r")
     for line in file.readlines():
         if line[:4] == "<?py" or line[:2] == "?>" or StartTag:
-            work(line)
+            work(line,arguments)
         else:
             output = output + line
     file.close()
