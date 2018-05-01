@@ -134,6 +134,7 @@ def run(server_class= HTTPServer, handler_class=BaseHTTPRequestHandler):
     #httpd = server_class(server_address, handler_class)
     httpd = ThreadedHTTPServer(server_address, handler_class)#Multi threaded
     logging.info("Running forever")
+    print("Up and running! Visit {host}:{port} to use the website.".format(host=HOSTNAME, port=PORT))
     httpd.serve_forever()
 
 art = """\
