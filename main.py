@@ -7,6 +7,7 @@ import os
 import sys
 import threading
 from socketserver import ThreadingMixIn
+import extensions.ilpy as ilpy
 try:
     import conf.conf as c # conf.py
 except:
@@ -48,7 +49,13 @@ class Server(BaseHTTPRequestHandler):
                     "CONTENT_TYPE": CONTENT_TYPE
                 }
                 self._set_resonse(type=file[1], code=200)
-                exec(file[0], arguments)
+                #exec(file[0], arguments)
+                dir_path = os.path.dirname(os.path.realpath(__file__))
+                output = ilpy.run(dir_path + "/" + file[0],arguments)
+                firstLine = output.split("\n",1)[0]
+                if firstLine.startswith("#"):
+                    output = output.split("\n",1)[1]
+                self.wfile.write(output.encode("utf-8"))
             else:
                 self._set_resonse(type=file[1],code=200)
                 self.wfile.write(file[0])
@@ -78,11 +85,9 @@ class Server(BaseHTTPRequestHandler):
         if not os.path.isfile(loc):
             return False
         try:
-            if loc.endswith(".py"):
+            if loc.endswith(".ilpy"):
                 tempFile = open(loc, "r")
-                outputCode = "def printhook(text):\n\tif isinstance(text,bytes):\n\t\tself.wfile.write(text)\n\telse:\n\t\tself.wfile.write(str(text).encode('utf-8'))\nprint = printhook\n\n\n"
-                data = outputCode + tempFile.read()
-                tempFile.seek(0)
+                data = loc
                 firstLine = tempFile.readline().strip()
                 type = "text/plain"
                 if firstLine.startswith("#"):
@@ -106,8 +111,8 @@ class Server(BaseHTTPRequestHandler):
         if os.path.isdir(PUBLIC_DIR + file) and not file.endswith("/"):
             file = file + "/"
         if file.endswith("/"):
-            if os.path.isfile(PUBLIC_DIR + file + "index.py"):
-                file = file + "index.py"
+            if os.path.isfile(PUBLIC_DIR + file + "index.ilpy"):
+                file = file + "index.ilpy"
             else:
                 file = file + "index.html"
         return PUBLIC_DIR + file
@@ -127,7 +132,7 @@ def run(server_class= HTTPServer, handler_class=BaseHTTPRequestHandler):
     server_address = (HOSTNAME,PORT)
     logging.info("Starting server")
     #httpd = server_class(server_address, handler_class)
-    httpd = ThreadedHTTPServer(server_address, handler_class)
+    httpd = ThreadedHTTPServer(server_address, handler_class)#Multi threaded
     logging.info("Running forever")
     httpd.serve_forever()
 
