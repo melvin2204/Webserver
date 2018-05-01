@@ -5,24 +5,24 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import logging
 import os
 import sys
-from io import StringIO
-import contextlib
-import subprocess
-try:
+import _thread as thread
+import conf.conf as c # conf.py
+"""try:
     import conf.conf as c # conf.py
 except:
     logging.critical("Could not find conf.py.")
-    sys.exit()
+    sys.exit()"""
 
-HOSTNAME = c.HOSTNAME
-PORT = c.PORT
-PUBLIC_DIR = c.PUBLIC_DIR
-ERROR_DOC = c.ERROR_DOC
+HOSTNAME = c.config['server']['HOSTNAME']
+PORT = int(c.config['server']['PORT'])
+PUBLIC_DIR = c.config['server']['PUBLIC_DIR']
+ERROR_DOC = c.config['error_doc']
+BEHIND_PROXY = c.config['server']['BEHIND_PROXY'].lower()
 MIME_TYPES = c.MIME_TYPES
 
 class Server(BaseHTTPRequestHandler):
-    server_version = c.SERVER_VERSION
-    sys_version = c.SYS_VERSION
+    server_version = c.config['server']['SERVER_VERSION']
+    sys_version = c.config['server']['SYS_VERSION']
     def _set_resonse(self,type = "text/plain",code=200):
         self.send_response(code)
         self.send_header("Content-type",type)
@@ -37,7 +37,7 @@ class Server(BaseHTTPRequestHandler):
                 HOST = self.headers.get("Host")
                 USER_AGENT = self.headers.get('User-Agent')
                 CONTENT_TYPE = "text/plain"
-                if c.BEHIND_PROXY:
+                if BEHIND_PROXY == "true":
                     REMOTE_ADDR = self.headers.get("X-Forwarded-For")
                     HOST = self.headers.get("X-Forwarded-Host")
                 arguments = {
@@ -48,7 +48,7 @@ class Server(BaseHTTPRequestHandler):
                     "CONTENT_TYPE": CONTENT_TYPE
                 }
                 self._set_resonse(type=file[1], code=200)
-                exec(file[0],arguments)
+                exec(file[0], arguments)
             else:
                 self._set_resonse(type=file[1],code=200)
                 self.wfile.write(file[0])
@@ -56,7 +56,7 @@ class Server(BaseHTTPRequestHandler):
             error_doc = self.getFile(ERROR_DOC.get("404"),root=True)
             if error_doc == False:
                 self._set_resonse(type="text/plain",code=404)
-                self.wfile.write("404 not found but another 404 occurred when loading the error document.".encode('utf-8'))
+                self.wfile.write(b"404 not found but another 404 occurred when loading the error document.")
             else:
                 self._set_resonse(type=error_doc[1],code=404)
                 self.wfile.write(error_doc[0])
@@ -120,16 +120,6 @@ class Server(BaseHTTPRequestHandler):
             return type
 
 
-@contextlib.contextmanager
-def stdoutIO(stdout=None):
-    old = sys.stdout
-    if stdout is None:
-        stdout = StringIO()
-    sys.stdout = stdout
-    yield stdout
-    sys.stdout = old
-
-
 def run(server_class= HTTPServer, handler_class=BaseHTTPRequestHandler):
     logging.basicConfig(level=c.LOG_LEVEL)
     server_address = (HOSTNAME,PORT)
@@ -138,5 +128,22 @@ def run(server_class= HTTPServer, handler_class=BaseHTTPRequestHandler):
     logging.info("Running forever")
     httpd.serve_forever()
 
+art = """\
+  __  __      _       _       ___  ___   ___  _  _   
+ |  \/  |    | |     (_)     |__ \|__ \ / _ \| || |  
+ | \  / | ___| |_   ___ _ __    ) |  ) | | | | || |_ 
+ | |\/| |/ _ \ \ \ / / | '_ \  / /  / /| | | |__   _|
+ | |  | |  __/ |\ V /| | | | |/ /_ / /_| |_| |  | |  
+ |_|  |_|\___|_| \_/ |_|_| |_|____|____|\___/   |_|  
+              | |                                    
+ __      _____| |__  ___  ___ _ ____   _____ _ __    
+ \ \ /\ / / _ \ '_ \/ __|/ _ \ '__\ \ / / _ \ '__|   
+  \ V  V /  __/ |_) \__ \  __/ |   \ V /  __/ |      
+   \_/\_/ \___|_.__/|___/\___|_|    \_/ \___|_|      
+                                                     
+                                                     
+"""
+
 if __name__ == "__main__":
+    print(art)
     run(handler_class=Server)
