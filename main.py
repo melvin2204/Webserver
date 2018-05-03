@@ -7,7 +7,11 @@ import os
 import sys
 import threading
 from socketserver import ThreadingMixIn
-import extensions.ilpy as ilpy
+from system import ilpy
+from system import checkport
+from system import versionCheck
+from system import handleQueryString
+import time
 try:
     import conf.conf as c # conf.py
 except:
@@ -22,16 +26,22 @@ BEHIND_PROXY = c.config['server']['BEHIND_PROXY'].lower()
 MIME_TYPES = c.MIME_TYPES
 
 class Server(BaseHTTPRequestHandler):
-    server_version = c.config['server']['SERVER_VERSION']
-    sys_version = c.config['server']['SYS_VERSION']
+    server_version = "Melvin2204 Webserver"
+    with open("system/version.txt","r") as version:
+        version = version.read()
+    sys_version = version
     def _set_resonse(self,type = "text/plain",code=200):
         self.send_response(code)
         self.send_header("Content-type",type)
         self.end_headers()
 
     def do_GET(self):#Get request
-        logging.info("GET request,\nPath: %s\nHeaders:\n%s\n", str(self.path), str(self.headers))
-        file = self.getFile(self.path)#file contents of request path. Returns false if 404
+        path = self.path
+        queryString = {}
+        if "?" in self.path:
+            path = self.path.split("?")[0]
+            queryString = handleQueryString.GET(self.path.split("?")[1])
+        file = self.getFile(path)#file contents of request path. Returns false if 404
         if not file == False:
             if file[2]:
                 REMOTE_ADDR = self.client_address[0]
@@ -46,7 +56,8 @@ class Server(BaseHTTPRequestHandler):
                     "REMOTE_ADDR": REMOTE_ADDR,
                     "HOST": HOST,
                     "USER_AGENT": USER_AGENT,
-                    "CONTENT_TYPE": CONTENT_TYPE
+                    "CONTENT_TYPE": CONTENT_TYPE,
+                    "GET": queryString,
                 }
                 self._set_resonse(type=file[1], code=200)
                 #exec(file[0], arguments)
@@ -128,7 +139,6 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
 
 def run(server_class= HTTPServer, handler_class=BaseHTTPRequestHandler):
-    logging.basicConfig(level=c.LOG_LEVEL)
     server_address = (HOSTNAME,PORT)
     logging.info("Starting server")
     #httpd = server_class(server_address, handler_class)
@@ -149,10 +159,27 @@ art = """\
  \ \ /\ / / _ \ '_ \/ __|/ _ \ '__\ \ / / _ \ '__|   
   \ V  V /  __/ |_) \__ \  __/ |   \ V /  __/ |      
    \_/\_/ \___|_.__/|___/\___|_|    \_/ \___|_|      
-                                                     
-                                                     
+                                                                                                         
 """
 
 if __name__ == "__main__":
-    print(art)
+    with open("system/version.txt","r") as version:
+        version = version.read()
+    print(art + version)
+    logging.basicConfig(level=c.LOG_LEVEL)
+    logging.info("Checking if port is available.")
+    if c.config["update"]["AUTO_CHECK"].lower()== "true":
+        if versionCheck.check(c.config["update"]['AUTO_UPDATE'].lower(),c.config["update"]["VERSION_URL"],c.config["update"]["DOWNLOAD_URL"]):
+            logging.info("Updating done.")
+            for i in range(0,5):
+                print("Restarting server in {s}".format(s = 5 - (i)))
+                time.sleep(1)
+            #os.execl("main.py")
+            with open("main.py","r") as code:
+                exec(code.read())
+            #sys.exit()
+
+    if not checkport.checkport(HOSTNAME,PORT):
+        input("Press enter to exit.".format(port = PORT))
+        sys.exit()
     run(handler_class=Server)
