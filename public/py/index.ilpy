@@ -14,6 +14,7 @@ output("With calculations! " + str(10**10) + "<br>")
 output("The time is now " + str(datetime.now().time()) + "<br>")
 output("Your useragent: " + USER_AGENT + "<br>")
 output("Your ip: " + REMOTE_ADDR + "<br>")
+output("GET: " + str(GET) + "<br>")
 ?>
 </p>
 </body>
