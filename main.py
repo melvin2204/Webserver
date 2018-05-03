@@ -33,6 +33,7 @@ class Server(BaseHTTPRequestHandler):
     def _set_resonse(self,type = "text/plain",code=200):
         self.send_response(code)
         self.send_header("Content-type",type)
+        self.send_header("download","https://github.com/melvin2204/Webserver/")
         self.end_headers()
 
     def do_GET(self):#Get request
