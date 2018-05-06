@@ -91,7 +91,7 @@ class Server(BaseHTTPRequestHandler):
         #self._set_response()
         #self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
         self._set_resonse(type="text/plain", code=405)
-        self.wfile.write("405 - No post requests".encode('utf-8'))
+        self.wfile.write("405 - No post requests (yet)".encode('utf-8'))
 
     def getFile(self,file,root = False):  #function for getting files from the server
         if root == True:  #wether to use the root dir
