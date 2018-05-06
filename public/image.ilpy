@@ -1,0 +1,7 @@
+#Content-Type: text/plain
+<?py
+img = open("public/img/profilePicture.png","rb")
+self.wfile.write(img.read())
+print(img.read())
+img.close()
+?>

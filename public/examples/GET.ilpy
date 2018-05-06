@@ -1,0 +1,10 @@
+#Content-type: text/html
+<?py
+output("Received this GET query: " + str(GET) + "<br>")
+for get in GET:
+    if len(GET[get]) > 0:
+        output("The value of {x} is {y}".format(x = get,y = GET[get]))
+    else:
+        output(get + " is empty.")
+    output("<br>")
+?>
