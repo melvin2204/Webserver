@@ -1,5 +1,5 @@
 import urllib.parse
-def GET(query):
+def parse(query):
     query = urllib.parse.unquote(query)#decode ascii
     output = {}#output variable
     if "&" in query:#if there is more than one get item

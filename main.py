@@ -13,6 +13,7 @@ try:
     from system import checkport  #check if the port is free
     from system import versionCheck  #check for updates
     from system import handleQueryString  #handle GET/POST
+    from system import handleRequest  #handle requests
     import conf.conf as c  # conf.py
 except Exception as e:
     logging.critical("Error loading modules.")
@@ -31,67 +32,17 @@ class Server(BaseHTTPRequestHandler):
     with open("system/version.txt","r") as version:  #read the server ersion and add it to the headers
         version = version.read()
     sys_version = version
-    def _set_resonse(self,type = "text/plain",code=200):  #write a response header
+    def _set_response(self,type = "text/plain",code=200):  #write a response header
         self.send_response(code)  #response code. Default 200
         self.send_header("Content-type",type)  #Send content type header. Default text/plain
         self.send_header("download","https://github.com/melvin2204/Webserver/")  #send downloadlink header
         self.end_headers()  #send headers
 
     def do_GET(self):  #Get request
-        path = self.path  #the requested path including GET query
-        queryString = {}
-        if "?" in self.path:  #if the path contains a query
-            path = self.path.split("?")[0]  #split it
-            queryString = handleQueryString.GET(self.path.split("?")[1])  #Parse the query string
-        file = self.getFile(path)  #file contents of request path. Returns code on error, tuple on success
-        if type(file) is tuple:  #if the file is found
-            if file[2]:  #if the file is an ilpy file
-                REMOTE_ADDR = self.client_address[0]  #user ip
-                HOST = self.headers.get("Host")  #host
-                USER_AGENT = self.headers.get('User-Agent')  #useragent
-                if BEHIND_PROXY == "true":  #if the server is behind a proxy, use the forwarded for headers
-                    REMOTE_ADDR = self.headers.get("X-Forwarded-For")
-                    HOST = self.headers.get("X-Forwarded-Host")
-                arguments = {
-                    "self": self,
-                    "REMOTE_ADDR": REMOTE_ADDR,
-                    "HOST": HOST,
-                    "USER_AGENT": USER_AGENT,
-                    "GET": queryString,
-                }  #add the arguments to a dict
-                self._set_resonse(type=file[1], code=200)#set the response header
-                dir_path = os.path.dirname(os.path.realpath(__file__))  #location where this file is being ran
-                output = ilpy.run(dir_path + "/" + file[0],arguments)  #Parse and run the ilpy file. Catch output afterwards
-                firstLine = output.split("\n",1)[0]  #get the first line of the output to remove the content-type
-                if firstLine.startswith("#"):  #if there is a comment (content-type)
-                    output = output.split("\n",1)[1]  #remove it
-                self.wfile.write(output.encode("utf-8"))  #write the final output to the response
-            else:  #the file does not need to be ran first
-                self._set_resonse(type=file[1],code=200)  #set the response header
-                self.wfile.write(file[0])  #write the output to the response
-        elif file == 503:  #if a 503 occured
-            self._set_resonse(type="text/plain", code=503)
-            #self.wfile.write(b"404 not found but an error occurred when loading the error document.")
-        elif file == 403:  #if a 403 occured
-            self._set_resonse(type="text/plain", code=403)
-            # self.wfile.write(b"404 not found but an error occurred when loading the error document.")
-        else:  #the file is not found
-            error_doc = self.getFile(ERROR_DOC.get("404"),root=True)  #Get the 404 page location
-            if not type(file) is tuple:  # an error occured when loading the 404 file
-                self._set_resonse(type="text/plain",code=404)
-                self.wfile.write(b"404 not found but an error occurred when loading the error document.")
-            else:  # the file is found
-                self._set_resonse(type=error_doc[1],code=404)
-                self.wfile.write(error_doc[0])  #write the output of the 404 file
+        handleRequest.GET(self,c)  #handle GET request
 
     def do_POST(self):
-        #content_length = int(self.headers['Content-Length'])  # <--- Gets the size of data
-        #post_data = self.rfile.read(content_length)  # <--- Gets the data itself
-        #logging.info("POST request,\nPath: %s\nHeaders:\n%s\n\nBody:\n%s\n",str(self.path), str(self.headers), post_data.decode('utf-8'))
-        #self._set_response()
-        #self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
-        self._set_resonse(type="text/plain", code=405)
-        self.wfile.write("405 - No post requests (yet)".encode('utf-8'))
+        handleRequest.POST(self,c)  #handle POST request
 
     def getFile(self,file,root = False):  #function for getting files from the server
         if root == True:  #wether to use the root dir
