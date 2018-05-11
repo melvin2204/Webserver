@@ -1,0 +1,10 @@
+#Content-type: text/html
+<?py
+output("Received this POST query: " + str(POST) + "<br>")
+for post in POST:
+    if len(POST[post]) > 0:
+        output("The value of {x} is {y}".format(x = post,y = POST[post]))
+    else:
+        output(post + " is empty.")
+    output("<br>")
+?>
