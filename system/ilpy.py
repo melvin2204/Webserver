@@ -57,7 +57,7 @@ def output(text,*args, **kwargs):
         file.write(str(text) + "\\n")
     file.close()
 input = void
-#print = output
+print = output
 
 """  #code to inject to collect the output
     code = injectionCode + code  #add it to the code
